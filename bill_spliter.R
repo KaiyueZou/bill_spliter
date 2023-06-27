@@ -99,31 +99,68 @@ mtr_simple <- mtr
 
 # Simplify the final transactions even further 
 one_dim_bill_maker <- function(mtr){
-  max_in_search <- max(mtr)
   
-  while(max_in_search > min(mtr)){
-    max_idx <- which(mtr == max_in_search, arr.ind = TRUE)
-    
-    for (i in seq_len(nrow(max_idx))) {
-      first_idx <- max_idx[i, ]
-      snd_vector <- mtr[first_idx[2], ]
-      second_max_col <- which(snd_vector == 
-                                max(snd_vector[snd_vector <= max_in_search]))[1]
-      if(length(second_max_col) == 0){next}
-      second_max_idx <- c(first_idx[2], second_max_col)
+  ### From max to min
+  mtr_prior <- matrix(0, nrow = nrow(mtr), ncol = ncol(mtr))
+  while(!all(mtr == mtr_prior)){
+    mtr_prior <- mtr
+  
+    max_in_search <- max(mtr)
+    while(max_in_search > min(mtr)){
+      max_idx <- which(mtr == max_in_search, arr.ind = TRUE)
       
-      mtr[first_idx[1], second_max_idx[2]] <- 
-        (mtr[first_idx[1], second_max_idx[2]]
-          + mtr[second_max_idx[1], second_max_idx[2]])
-      mtr[first_idx[1], first_idx[2]] <- 
-        (mtr[first_idx[1], first_idx[2]] 
-          - mtr[second_max_idx[1], second_max_idx[2]])
-      mtr[second_max_idx[1], second_max_idx[2]] <- 0
+      for (i in seq_len(nrow(max_idx))) {
+        first_idx <- max_idx[i, ]
+        snd_vector <- mtr[first_idx[2], ]
+        second_max_col <- which(snd_vector == 
+                                  max(snd_vector[snd_vector <= max_in_search]))[1]
+        if(length(second_max_col) == 0){next}
+        second_max_idx <- c(first_idx[2], second_max_col)
+        
+        mtr[first_idx[1], second_max_idx[2]] <- 
+          (mtr[first_idx[1], second_max_idx[2]]
+            + mtr[second_max_idx[1], second_max_idx[2]])
+        mtr[first_idx[1], first_idx[2]] <- 
+          (mtr[first_idx[1], first_idx[2]] 
+            - mtr[second_max_idx[1], second_max_idx[2]])
+        mtr[second_max_idx[1], second_max_idx[2]] <- 0
+      }
+      
+      max_in_search <- max(mtr[mtr < max_in_search])
     }
-    
-    max_in_search <- max(mtr[mtr < max_in_search], na.rm = T)
   }
   
+  ### From min to max
+  mtr_prior <- matrix(0, nrow = nrow(mtr), ncol = ncol(mtr))
+  while(!all(mtr == mtr_prior)){
+    mtr_prior <- mtr
+    
+    min_in_search <- min(mtr[mtr > 0])
+    while(min_in_search < max(mtr)){
+      min_idx <- which(mtr == min_in_search, arr.ind = TRUE)
+      
+      for (i in seq_len(nrow(min_idx))) {
+        first_idx <- min_idx[i, ]
+        snd_vector <- mtr[first_idx[2], ]
+        second_max_col <- which(snd_vector == 
+                                  min(snd_vector[snd_vector >= min_in_search]))[1]
+        if(length(second_max_col) == 0 | is.na(second_max_col)){next}
+        second_max_idx <- c(first_idx[2], second_max_col)
+        
+        mtr[first_idx[1], second_max_idx[2]] <- 
+          (mtr[first_idx[1], second_max_idx[2]]
+           + mtr[first_idx[1], first_idx[2]])
+        mtr[second_max_idx[1], second_max_idx[2]] <- 
+          (mtr[second_max_idx[1], second_max_idx[2]] 
+           - mtr[first_idx[1], first_idx[2]])
+        mtr[first_idx[1], first_idx[2]] <- 0
+      }
+      
+      min_in_search <- min(mtr[mtr > min_in_search])
+    }
+  }
+  
+  ### Return the final matrix 
   return(mtr)
 }
 mtr <- one_dim_bill_maker(mtr)
