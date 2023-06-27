@@ -1,0 +1,28 @@
+From row names to column names: the flow of money to return
+
+The first matrix is the original one: 
+       K      L    Y      R
+K   0.00 525.18 39.5 120.75
+L 425.85   0.00 39.5 120.75
+Y 364.35 525.18  0.0 120.75
+R 364.35 525.18 39.5   0.00
+
+The second matrix is the simplified one: 
+       K      L Y     R
+K   0.00  99.33 0  0.00
+L   0.00   0.00 0  0.00
+Y 324.85 485.68 0 81.25
+R 243.60 404.43 0  0.00
+
+The third matrix simplified the transactions even further: 
+       K      L Y R
+K   0.00   0.00 0 0
+L   0.00   0.00 0 0
+Y 306.77 585.01 0 0
+R 162.35 404.43 0 0
+
+To summarize: 
+Y should give back 306.77 to K 
+Y should give back 585.01 to L 
+R should give back 162.35 to K 
+R should give back 404.43 to L 
