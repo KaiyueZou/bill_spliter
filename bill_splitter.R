@@ -5,7 +5,7 @@
 #
 # Content
 #   - Type in all the transactions 
-#   - Character spliter 
+#   - Character splitter 
 #   - Use the function to calculate 
 #===================================
 
